@@ -5,8 +5,17 @@
   --foreground: #171717;
 }
 
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-iran-yekan), Arial, Helvetica, sans-serif;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea {
+  @apply rounded-sm border border-gray-400 py-2 px-2 w-[400px];
 }
