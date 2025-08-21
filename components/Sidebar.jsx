@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen = false, onClose }) {
       { label: 'محصولات', href: '/products' },  // app/products/page.jsx
       { label: 'دسته‌بندی‌ها', href: '/categories' },
       { label: 'برندها', href: '/brands' },
-      { label: 'رنگ‌ها', href: '/colors' },
+      { label: 'رنگ‌ها', href: '/color' },
       { label: 'تگ‌ها', href: '/tags' },
     ]},
 
