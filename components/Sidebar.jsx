@@ -58,24 +58,22 @@ export default function Sidebar({ isOpen = false, onClose }) {
       { label: 'دسته‌بندی‌ها', href: '/categories' },
       { label: 'برندها', href: '/brands' },
       { label: 'رنگ‌ها', href: '/color' },
-      { label: 'تگ‌ها', href: '/tags' },
     ]},
 
-    { title: 'فروش', icon: ChartBarIcon, items: [
-      { label: 'سفارش‌ها', href: '/orders' },
-      { label: 'پرداخت‌ها', href: '/payments' },
-      { label: 'ارسال‌ها', href: '/shipping' },
-      { label: 'سبدها', href: '/carts' },
-    ]},
+    // { title: 'فروش', icon: ChartBarIcon, items: [
+    //   { label: 'سفارش‌ها', href: '/orders' },
+    //   { label: 'پرداخت‌ها', href: '/payments' },
+    //   { label: 'ارسال‌ها', href: '/shipping' },
+    //   { label: 'سبدها', href: '/carts' },
+    // ]},
 
     { title: 'مشتریان', icon: RectangleGroupIcon, items: [
       { label: 'کاربران', href: '/users' },
-      { label: 'آدرس‌ها', href: '/user-addresses' },
     ]},
 
-    { title: 'تنظیمات', icon: Cog8ToothIcon, items: [
-      { label: 'عمومی', href: '/settings' },
-    ]},
+    // { title: 'تنظیمات', icon: Cog8ToothIcon, items: [
+    //   { label: 'عمومی', href: '/settings' },
+    // ]},
   ];
 
   const isActive = (href) =>
