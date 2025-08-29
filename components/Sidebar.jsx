@@ -44,37 +44,38 @@ function MenuItem({ href = '#', active = false, children, dot = false }) {
   );
 }
 
+function MenuLink({ href, icon: Icon, active=false, children }) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm
+      ${active ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}
+    >
+      {Icon ? <Icon className="w-5 h-5" /> : null}
+      <span className="font-medium truncate">{children}</span>
+    </Link>
+  );
+}
+
+
 export default function Sidebar({ isOpen = false, onClose }) {
   const pathname = usePathname();
 
-  // مسیرها را با صفحات واقعی خودت هماهنگ کن (در app/.../page.jsx بساز)
   const menu = [
-    { title: 'داشبورد', icon: Squares2X2Icon, items: [
-      { label: 'خانه', href: '/dashboard' },    // app/dashboard/page.jsx
-    ], defaultOpen: true },
+    { type: 'link', label: 'خانه', href: '/dashboard', icon: Squares2X2Icon, defaultOpen: true },
 
-    { title: 'کاتالوگ', icon: CubeIcon, items: [
-      { label: 'محصولات', href: '/products' },  // app/products/page.jsx
+    { type: 'section', title: 'کاتالوگ', icon: CubeIcon, items: [
+      { label: 'محصولات', href: '/products' },
       { label: 'دسته‌بندی‌ها', href: '/categories' },
       { label: 'برندها', href: '/brands' },
       { label: 'رنگ‌ها', href: '/color' },
     ]},
 
-    // { title: 'فروش', icon: ChartBarIcon, items: [
-    //   { label: 'سفارش‌ها', href: '/orders' },
-    //   { label: 'پرداخت‌ها', href: '/payments' },
-    //   { label: 'ارسال‌ها', href: '/shipping' },
-    //   { label: 'سبدها', href: '/carts' },
-    // ]},
-
-    { title: 'مشتریان', icon: RectangleGroupIcon, items: [
+    { type: 'section', title: 'مشتریان', icon: RectangleGroupIcon, items: [
       { label: 'کاربران', href: '/users' },
     ]},
-
-    // { title: 'تنظیمات', icon: Cog8ToothIcon, items: [
-    //   { label: 'عمومی', href: '/settings' },
-    // ]},
   ];
+
 
   const isActive = (href) =>
     pathname === href || pathname.startsWith(href + '/');
@@ -103,22 +104,31 @@ export default function Sidebar({ isOpen = false, onClose }) {
         </div>
 
         <nav className="px-3 pb-6">
-          {menu.map(sec => (
-            <MenuSection
-              key={sec.title}
-              title={sec.title}
-              icon={sec.icon}
-              defaultOpen={sec.defaultOpen}
-              badge={sec.badge}
-            >
-              {sec.items.map(it => (
-                <MenuItem key={it.href} href={it.href} active={isActive(it.href)}>
-                  {it.label}
-                </MenuItem>
-              ))}
-            </MenuSection>
-          ))}
+          {menu.map((sec) =>
+            sec.type === 'link' ? (
+              <div key={sec.href} className="mt-2">
+                <MenuLink href={sec.href} icon={sec.icon} active={isActive(sec.href)}>
+                  {sec.label}
+                </MenuLink>
+              </div>
+            ) : (
+              <MenuSection
+                key={sec.title}
+                title={sec.title}
+                icon={sec.icon}
+                defaultOpen={sec.defaultOpen}
+                badge={sec.badge}
+              >
+                {sec.items.map(it => (
+                  <MenuItem key={it.href} href={it.href} active={isActive(it.href)}>
+                    {it.label}
+                  </MenuItem>
+                ))}
+              </MenuSection>
+            )
+          )}
         </nav>
+
       </aside>
     </>
   );

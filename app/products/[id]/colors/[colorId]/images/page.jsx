@@ -11,6 +11,7 @@ export default function Page() {
   const pcId = Array.isArray(colorId) ? colorId[0] : colorId;
 
   const [rows, setRows] = useState([]);
+  const [ProductName, setProductName] = useState('');
 
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
@@ -18,8 +19,10 @@ export default function Page() {
 
   const loadData = async () => {
     try {
-      const data = await listImages(pcId);
+      const data = await listImages(pcId); 
       setRows(data);
+      if (data && data.length > 0)
+        setProductName(data[0].ProductName + " " + data[0].ColorName);
     } catch {
       alert('خطا در دریافت تصاویر');
     }
@@ -61,7 +64,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">تصاویر محصول </h1>
+        <h1 className="text-2xl font-semibold">تصاویر محصول {ProductName}</h1>
         <div className="flex gap-2">
           <Link href={`/products/${productId}/colors`} className="px-3 py-2 rounded border">بازگشت</Link>
           <Link href={`/products/${productId}/colors/${pcId}/images/new`} className="px-3 py-2 rounded bg-blue-600 text-white">افزودن تصویر</Link>

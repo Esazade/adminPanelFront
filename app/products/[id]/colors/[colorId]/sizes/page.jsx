@@ -11,11 +11,14 @@ export default function Page() {
   const pcId = Array.isArray(colorId) ? colorId[0] : colorId;
 
   const [rows, setRows] = useState([]);
+  const [ProductName, setProductName] = useState('');
 
   const load = async () => {
     try {
-      const data = await listSizes(pcId);
+      const data = await listSizes(pcId); console.log("data",data);
       setRows(data);
+      if (data && data.length > 0)
+        setProductName(data[0].ProductName + " " + data[0].ColorName);
     } catch {
       alert('خطا در دریافت سایزها');
     }
@@ -39,7 +42,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">سایزهای رنگ #{pcId}</h1>
+        <h1 className="text-2xl font-semibold">سایزهای محصول{ProductName}</h1>
         <div className="flex gap-2">
           <Link href={`/products/${productId}/colors`} className="px-3 py-2 rounded border">بازگشت</Link>
           <Link href={`/products/${productId}/colors/${pcId}/sizes/new`} className="px-3 py-2 rounded bg-blue-600 text-white">افزودن سایز</Link>

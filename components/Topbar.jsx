@@ -7,9 +7,7 @@ export default function Topbar({ onMenu, onLogout }) {
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4">
       <nav className="hidden sm:flex items-center gap-6 text-slate-600 text-sm">
-        <a className="hover:text-slate-900" href="#">صفحه نخست</a>
-        <a className="hover:text-slate-900" href="#">تماس با ما</a>
-        <a className="hover:text-slate-900" href="#">صفحه نخست</a>
+        <a className="hover:text-slate-900" href="/dashboard">خانه </a>
       </nav>
 
       <div className="flex items-center gap-4">

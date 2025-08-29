@@ -10,12 +10,15 @@ export default function Page({ params }) {
   const productId = Array.isArray(id) ? id[0] : id; 
 
   const [rows, setRows] = useState([]);
+  const [ProductName, setProductName] = useState('');
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await listProductColors(productId);
+        const data = await listProductColors(productId); 
         setRows(data);
+        if (data && data.length > 0)
+          setProductName(data[0].ProductName);
       } catch {
         alert('خطا در دریافت رنگ‌های محصول');
       }
@@ -35,7 +38,7 @@ export default function Page({ params }) {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">رنگ‌های محصول </h1>
+        <h1 className="text-2xl font-semibold">رنگ‌های محصول {ProductName}</h1>
         <div className="flex gap-2">
           <Link href={`/products`} className="px-3 py-2 rounded border">بازگشت</Link>
           <Link href={`/products/${productId}/colors/new`} className="px-3 py-2 rounded bg-blue-600 text-white">افزودن رنگ</Link>
@@ -63,7 +66,7 @@ export default function Page({ params }) {
                   <Link href={`/products/${productId}/colors/${r.ID}/images`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
                     تصاویر
                   </Link>
-                  <Link href={`/products/${productId}/sizes/${r.ID}/sizes`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
+                  <Link href={`/products/${productId}/colors/${r.ID}/sizes`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
                     سایز
                   </Link>
                   <button onClick={() => onDelete(r.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
