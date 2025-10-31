@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen = false, onClose }) {
   const pathname = usePathname();
 
   const menu = [
-    { type: 'link', label: 'خانه', href: '/dashboard', icon: Squares2X2Icon, defaultOpen: true },
+    { type: 'link', label: 'خانه', href: '/', icon: Squares2X2Icon, defaultOpen: true },
 
     { type: 'section', title: 'کاتالوگ', icon: CubeIcon, items: [
       { label: 'محصولات', href: '/products' },
@@ -90,7 +90,7 @@ export default function Sidebar({ isOpen = false, onClose }) {
         transform transition-transform duration-200 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
         md:sticky md:top-0 md:translate-x-0 md:z-auto md:flex-shrink-0 h-full md:h-screen overflow-y-auto`}>
         <div className="h-16 flex items-center px-4 border-b border-slate-700 justify-between">
-          <div className="font-semibold">پنل ادمین</div>
+          <Link href="\"><div className="font-semibold">پنل ادمین</div></Link>
           <button onClick={onClose} className="md:hidden p-1" aria-label="Close sidebar">
             <XMarkIcon className="w-6 h-6 text-slate-300" />
           </button>
