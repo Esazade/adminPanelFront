@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { createCategory, updateCategory, getCategory, listCategories } from './categoryApi';
+import { createCategory, updateCategory, getCategory,getParentCategory, listCategories } from './categoryApi';
 
 export default function CategoryForm({ categoryId }) {
   const isNew = categoryId === 'new';
@@ -26,7 +26,7 @@ export default function CategoryForm({ categoryId }) {
 
   useEffect(() => {
     (async () => {
-      const list = await listCategories();
+      const list = await getParentCategory(); 
       setAllCats(list);
     })();
   }, []);
