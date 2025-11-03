@@ -71,8 +71,9 @@ export default function Sidebar({ isOpen = false, onClose }) {
       { label: 'رنگ‌ها', href: '/color' },
     ]},
 
-    { type: 'section', title: 'مشتریان', icon: RectangleGroupIcon, items: [
+    { type: 'section', title: 'کاربران', icon: RectangleGroupIcon, items: [
       { label: 'کاربران', href: '/users' },
+      { label: 'تعریف نقش کاربران', href: '/roles' },
     ]},
   ];
 
