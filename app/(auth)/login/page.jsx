@@ -1,26 +1,38 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { loginUser } from '@/components/users/userApi';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true); // این قسمت باعث می‌شود که کد در سمت کلاینت اجرا شود
-  }, []);
+  useEffect(() => setIsClient(true), []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('نام کاربری:', username);
-    console.log('رمز عبور:', password);
+
+    try {
+      setLoading(true);
+
+      const result = await loginUser({
+        UserName: username,
+        Password: password,
+      });
+
+      window.location.href = '/'; 
+    } catch (err) {
+      console.error('❌ Login Error:', err);
+      alert(err.message || 'خطا در ورود به سیستم');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!isClient) {
-    return null; // در حالت سرور هیچ چیزی نمایش داده نمی‌شود
-  }
+  if (!isClient) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -39,8 +51,10 @@ export default function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
+
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-600">
               رمز عبور
@@ -53,17 +67,24 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
+
           <button
             type="submit"
+            disabled={loading}
             className="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
           >
-            ورود
+            {loading ? 'در حال ورود...' : 'ورود'}
           </button>
         </form>
+
         <p className="text-sm text-center mt-4">
-          هنوز حساب کاربری ندارید؟ <Link href="/register" className="text-blue-500">ثبت‌نام کنید</Link>
+          هنوز حساب کاربری ندارید؟{' '}
+          <Link href="/register" className="text-blue-500 hover:underline">
+            ثبت‌نام کنید
+          </Link>
         </p>
       </div>
     </div>

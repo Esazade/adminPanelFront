@@ -1,23 +1,42 @@
 'use client';
 
 import { useState } from 'react';
+import { registerUser } from '@/components/users/userApi';
 
 export default function Signup() {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       alert('رمز عبور و تایید رمز عبور یکسان نیستند!');
       return;
     }
-    // ارسال داده‌ها به سرور یا ذخیره در دیتابیس
-    console.log('نام کاربری:', username);
-    console.log('ایمیل:', email);
-    console.log('رمز عبور:', password);
+
+    try {
+      setLoading(true);
+
+      const result = await registerUser({
+        UserName: username,
+        Password: password,
+      });
+
+      alert(result.message || 'ثبت‌نام با موفقیت انجام شد ✅');
+      setUsername('');
+      setPassword('');
+      setConfirmPassword('');
+
+      window.location.href = '/login';
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'خطا در ثبت‌نام ❌');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,9 +88,10 @@ export default function Signup() {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
           >
-            ثبت‌نام
+            {loading ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
           </button>
         </form>
       </div>

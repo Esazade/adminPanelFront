@@ -5,8 +5,21 @@ const jsonHeaders = { 'Content-Type': 'application/json' };
 
 export async function listBrands(params = {}) {
   const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${API}/brands${qs ? `?${qs}` : ''}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('list brands failed');
+
+  const res = await fetch(`${API}/brands${qs ? `?${qs}` : ''}`, {
+    method: 'GET',
+    credentials: 'include', 
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store', 
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || 'list brands failed');
+  }
+
   return res.json();
 }
 

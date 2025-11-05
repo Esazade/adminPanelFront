@@ -1,12 +1,20 @@
 import BrandForm from '@/components/brands/BrandForm';
+import { redirect } from 'next/navigation';
+import { checkPermission } from '@/lib/checkPermission';
 
-export default function Page({ params }) { 
+export default async function Page({ params }) {
+  const { id } = await params; 
+  const hasAccess = await checkPermission('brand.create'); 
+  if (!hasAccess) {
+    redirect('/unauthorized'); // کاربر مجاز نیست
+  }
+
   return (
     <>
       <h1 className="text-2xl font-semibold mb-4">
-        {params.id === 'new' ? 'برند جدید' : `ویرایش برند #${params.Name}`}
+        {id === 'new' ? 'برند جدید' : `ویرایش برند #${id}`}
       </h1>
-      <BrandForm brandId={params.id} />
+      <BrandForm brandId={id} />
     </>
   );
 }

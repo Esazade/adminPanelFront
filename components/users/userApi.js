@@ -36,3 +36,54 @@ export async function listRoles() {
   return res.json();
 }
 
+export async function registerUser(data) {
+  const res = await fetch(`${API}/user/register`, {
+    method: 'POST',
+    headers: jsonHeaders,
+    body: JSON.stringify(data),
+  });
+
+  console.log(res);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'register failed');
+  }
+
+  return res.json();
+}
+
+export async function loginUser(data) {
+  const res = await fetch(`${API}/user/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data), 
+    credentials: 'include', 
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'login failed');
+  }
+
+  return res.json();
+}
+
+
+export async function logout(data) {
+  const res = await fetch(`${API}/user/logout`, {
+    method: 'POST',
+    credentials: 'include', 
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'logout failed');
+  }
+
+  return res.json();
+}
+
+
+
+
+
