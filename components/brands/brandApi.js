@@ -1,5 +1,6 @@
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:5000';
 import { uploadFile as coreUploadFile } from '@/lib/upload';
+import { authHeaders } from '@/lib/auth-client';
 
 const jsonHeaders = { 'Content-Type': 'application/json' };
 
@@ -8,10 +9,7 @@ export async function listBrands(params = {}) {
 
   const res = await fetch(`${API}/brands${qs ? `?${qs}` : ''}`, {
     method: 'GET',
-    credentials: 'include', 
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders(),
     cache: 'no-store', 
   });
 

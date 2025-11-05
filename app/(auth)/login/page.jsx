@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { loginUser } from '@/components/users/userApi';
 
+const TOKEN_KEY = 'access_token'; 
+
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,11 @@ export default function Login() {
         UserName: username,
         Password: password,
       });
+      console.log(result);
+      const token = result?.token;
+      if (!token) throw new Error('توکن دریافت نشد');
 
+      localStorage.setItem(TOKEN_KEY, token);
       window.location.href = '/'; 
     } catch (err) {
       console.error('❌ Login Error:', err);
