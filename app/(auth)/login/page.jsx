@@ -24,7 +24,7 @@ export default function Login() {
         UserName: username,
         Password: password,
       });
-      console.log(result);
+
       const token = result?.token;
       if (!token) throw new Error('توکن دریافت نشد');
 

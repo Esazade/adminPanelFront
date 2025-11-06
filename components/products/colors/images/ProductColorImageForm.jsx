@@ -71,7 +71,7 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
         });
         imageUrl = url;
       }
-      console.log("imageUrl",imageUrl);
+
       if (isNew && !imageUrl) {
         alert('انتخاب تصویر الزامی است');
         setSaving(false);

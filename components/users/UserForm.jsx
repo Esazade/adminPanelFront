@@ -39,7 +39,7 @@ export default function UserForm({ userId }) {
 
       const roleId =
         (user.RoleID ?? user.role ?? (Array.isArray(user.Roles) && user.Roles[0]?.ID) ?? 0);
-      console.log("user",user);
+
       setForm({
         UserName: user.UserName ?? '',
         Email: user.Email ?? '',

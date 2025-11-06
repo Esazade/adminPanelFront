@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listUsers, deleteUser } from '@/components/users/userApi';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [users, setUsers] = useState([]);
@@ -12,8 +14,8 @@ export default function Page() {
       try {
         const data = await listUsers();
         setUsers(data);
-      } catch {
-        alert('خطا در دریافت کاربران');
+      } catch(err) {
+        console.error(err.message);
       }
     })();
   }, []);
@@ -35,7 +37,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <RequirePermission code="user.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">کاربران</h1>
       </div>
@@ -65,14 +67,18 @@ export default function Page() {
                     : '---'}
                 </td>
                 <td className="px-3 py-2">
-                  <Link href={`/users/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
-                  <button onClick={() => onDelete(c.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  {hasPermission('user.update') && (
+                    <Link href={`/users/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
+                  )}
+                  {hasPermission('user.delete') && (
+                    <button onClick={() => onDelete(c.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </>
+    </RequirePermission >
   );
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { listProductColors, deleteProductColor } from '@/components/products/colors/productColorApi';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page({ params }) { 
   const { id } = useParams();                         
@@ -19,8 +21,8 @@ export default function Page({ params }) {
         setRows(data);
         if (data && data.length > 0)
           setProductName(data[0].ProductName);
-      } catch {
-        alert('خطا در دریافت رنگ‌های محصول');
+      } catch(err) {
+        console.error(err.message);
       }
     })();
   }, [productId]);
@@ -36,7 +38,7 @@ export default function Page({ params }) {
   };
 
   return (
-    <>
+    <RequirePermission code="productColor.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">رنگ‌های محصول {ProductName}</h1>
         <div className="flex gap-2">
@@ -62,14 +64,22 @@ export default function Page({ params }) {
                 <td className="px-3 py-2">{r.ColorName ?? r.ColorID ?? '—'}</td>
                 <td className="px-3 py-2">{r.SKU ?? '—'}</td>
                 <td className="px-3 py-2">
-                  <Link href={`/products/${productId}/colors/${r.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
-                  <Link href={`/products/${productId}/colors/${r.ID}/images`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
+                  {hasPermission('productColorImage.view') && (
+                    <Link href={`/products/${productId}/colors/${r.ID}/images`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
                     تصاویر
                   </Link>
-                  <Link href={`/products/${productId}/colors/${r.ID}/sizes`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
+                  )}
+                  {hasPermission('productColorSize.view') && (
+                    <Link href={`/products/${productId}/colors/${r.ID}/sizes`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >
                     سایز
                   </Link>
-                  <button onClick={() => onDelete(r.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  )}
+                  {hasPermission('productColor.update') && (
+                    <Link href={`/products/${productId}/colors/${r.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
+                  )}
+                  {hasPermission('productColor.delete') && (
+                    <button onClick={() => onDelete(r.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -79,6 +89,6 @@ export default function Page({ params }) {
           </tbody>
         </table>
       </div>
-    </>
+    </RequirePermission >
   );
 }

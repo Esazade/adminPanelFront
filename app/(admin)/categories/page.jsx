@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listCategories, deleteCategory } from '@/components/categories/categoryApi';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [cats, setCats] = useState([]);
@@ -13,8 +15,8 @@ export default function Page() {
       try {
         const data = await listCategories();
         setCats(data);
-      } catch {
-        alert('خطا در دریافت دسته‌ها');
+      }  catch(err) {
+        console.error(err.message);
       }
     })();
   }, []);
@@ -49,7 +51,7 @@ export default function Page() {
       : cats.filter(c => c.ParentCategoryID === Number(parentFilter));
 
   return (
-    <>
+    <RequirePermission code="category.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">گروه ها</h1>
         <Link href="/categories/new" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">
@@ -97,15 +99,12 @@ export default function Page() {
                     : <span className="text-xs text-slate-400">—</span>}
                 </td>
                 <td className="px-3 py-2">
-                  <Link href={`/categories/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">
-                    ویرایش
-                  </Link>
-                  <button
-                    onClick={() => onDelete(c.ID)}
-                    className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50"
-                  >
-                    حذف
-                  </button>
+                  {hasPermission('category.update') && (
+                      <Link href={`/categories/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2"> ویرایش</Link>
+                    )}
+                    {hasPermission('category.delete') && (
+                      <button onClick={() => onDelete(c.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50" >حذف</button>
+                    )}
                 </td>
               </tr>
             ))}
@@ -119,6 +118,6 @@ export default function Page() {
           </tbody>
         </table>
       </div>
-    </>
+    </RequirePermission>
   );
 }

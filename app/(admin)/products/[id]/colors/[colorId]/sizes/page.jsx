@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { listSizes, deleteSize } from '@/components/products/colors/sizes/productColorSizeApi';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const { id, colorId } = useParams();
@@ -15,12 +17,12 @@ export default function Page() {
 
   const load = async () => {
     try {
-      const data = await listSizes(pcId); console.log("data",data);
+      const data = await listSizes(pcId); 
       setRows(data);
       if (data && data.length > 0)
         setProductName(data[0].ProductName + " " + data[0].ColorName);
-    } catch {
-      alert('خطا در دریافت سایزها');
+    } catch(err) {
+      console.error(err.message);
     }
   };
 
@@ -40,7 +42,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <RequirePermission code="productColorSize.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">سایزهای محصول{ProductName}</h1>
         <div className="flex gap-2">
@@ -66,18 +68,22 @@ export default function Page() {
                 <td className="px-3 py-2">{r.Size ?? '—'}</td>
                 <td className="px-3 py-2">{r.Stock ?? '—'}</td>
                 <td className="px-3 py-2">
-                  <Link
-                    href={`/products/${productId}/colors/${pcId}/sizes/${r.ID}`}
-                    className="px-2 py-1 border rounded hover:bg-slate-50 ml-2"
-                  >
-                    ویرایش
-                  </Link>
-                  <button
+                  {hasPermission('productColorSize.update') && (
+                    <Link
+                      href={`/products/${productId}/colors/${pcId}/sizes/${r.ID}`}
+                      className="px-2 py-1 border rounded hover:bg-slate-50 ml-2"
+                    >
+                      ویرایش
+                    </Link>
+                  )}
+                  {hasPermission('productColorSize.delete') && (
+                    <button
                     onClick={() => onDelete(r.ID)}
                     className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50"
                   >
                     حذف
                   </button>
+                  )}                  
                 </td>
               </tr>
             ))}
@@ -89,6 +95,6 @@ export default function Page() {
           </tbody>
         </table>
       </div>
-    </>
+    </RequirePermission>
   );
 }

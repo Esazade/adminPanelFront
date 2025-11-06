@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listBrands, deleteBrand } from '@/components/brands/brandApi';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [brands, setBrands] = useState([]);
@@ -15,8 +17,8 @@ export default function Page() {
       try {
         const data = await listBrands();
         setBrands(data);
-      } catch (err) {
-        alert('خطا در دریافت برندها');
+      } catch(err) {
+        console.error(err.message);
       }
     })();
   }, []);
@@ -32,7 +34,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <RequirePermission code="brand.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">برندها</h1>
         <Link href="/brands/new" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">برند جدید</Link>
@@ -66,8 +68,12 @@ export default function Page() {
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    <Link href={`/brands/${b.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
-                    <button onClick={() => onDelete(b.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                    {hasPermission('brand.update') && (
+                      <Link href={`/brands/${b.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2" >ویرایش</Link>
+                    )}
+                    {hasPermission('brand.delete') && (
+                      <button onClick={() => onDelete(b.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                    )}
                   </td>
                 </tr>
               );
@@ -75,6 +81,6 @@ export default function Page() {
           </tbody>
         </table>
       </div>
-    </>
+    </RequirePermission>
   );
 }

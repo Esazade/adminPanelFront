@@ -2,8 +2,6 @@ const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:5000';
 import { uploadFile as coreUploadFile } from '@/lib/upload';
 import { authHeaders } from '@/lib/auth-client';
 
-const jsonHeaders = { 'Content-Type': 'application/json' };
-
 export async function listBrands(params = {}) {
   const qs = new URLSearchParams(params).toString();
 
@@ -22,7 +20,11 @@ export async function listBrands(params = {}) {
 }
 
 export async function getBrand(id) {
-  const res = await fetch(`${API}/brands/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${API}/brands/${id}`, {
+    method: 'GET',
+    headers: authHeaders(),
+    cache: 'no-store', 
+  });
   if (!res.ok) throw new Error('get brand failed');
   return res.json();
 }
@@ -30,7 +32,10 @@ export async function getBrand(id) {
 export async function createBrand(data) {
   const res = await fetch(`${API}/brands`, {
     method: 'POST',
-    headers: jsonHeaders,
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json', 
+    },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(await res.text() || 'create brand failed');
@@ -40,7 +45,10 @@ export async function createBrand(data) {
 export async function updateBrand(id, data) {
   const res = await fetch(`${API}/brands/${id}`, {
     method: 'PUT',
-    headers: jsonHeaders,
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json', 
+    },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(await res.text() || 'update brand failed');
@@ -48,7 +56,10 @@ export async function updateBrand(id, data) {
 }
 
 export async function deleteBrand(id) {
-  const res = await fetch(`${API}/brands/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API}/brands/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
   if (!res.ok) throw new Error(await res.text() || 'delete brand failed');
   return true;
 }
