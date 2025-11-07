@@ -7,12 +7,14 @@ import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [brands, setBrands] = useState([]);
+  const canView = hasPermission('brand.view');
 
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000'
   const API = 'http://localhost:5000'
   const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`)
 
   useEffect(() => {
+    if (!canView) return;
     (async () => {
       try {
         const data = await listBrands();

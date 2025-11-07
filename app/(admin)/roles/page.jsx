@@ -4,18 +4,22 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listRoles, deleteRole } from '@/components/roles/roleApi';
 import PermissionsModal from '@/components/roles/PermissionsModal';
+import RequirePermission from '@/components/auth/RequirePermission';
+import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [Roles, setRoles] = useState([]);
   const [openRole, setOpenRole] = useState(null);
+  const canView = hasPermission('role.view');
 
   useEffect(() => {
+    if (!canView) return;
     (async () => {
       try {
         const data = await listRoles();
         setRoles(data);
-      } catch {
-        alert('خطا در دریافت نقش ها');
+      } catch(err) {
+        console.error(err.message);
       }
     })();
   }, []);
@@ -37,7 +41,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <RequirePermission code="user.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">نقش ها</h1>
         <Link href="/roles/new" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">نقش جدید</Link>
@@ -58,9 +62,18 @@ export default function Page() {
                 <td className="px-3 py-2">{i + 1}</td>
                 <td className="px-3 py-2">{c.Name}</td>
                 <td className="px-3 py-2">
-                  <button onClick={()=>setOpenRole(c)} className="ml-2 px-2 py-1 border rounded hover:bg-slate-50">دسترسی‌ها</button>
-                  <Link href={`/roles/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
-                  <button onClick={() => onDelete(c.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  {hasPermission('role.update') && (
+                    <>
+                    <button onClick={()=>setOpenRole(c)} className="ml-2 px-2 py-1 border rounded hover:bg-slate-50">دسترسی‌ها</button>
+                    <Link href={`/roles/${c.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
+                    </>
+                  )}
+                  {hasPermission('role.delete') && (
+                    <button onClick={() => onDelete(c.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                  )}
+                  
+                  
+                  
                 </td>
               </tr>
             ))}
@@ -75,6 +88,6 @@ export default function Page() {
         )}
 
       </div>
-    </>
+    </RequirePermission>
   );
 }

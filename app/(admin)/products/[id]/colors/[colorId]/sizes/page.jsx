@@ -11,6 +11,7 @@ export default function Page() {
   const { id, colorId } = useParams();
   const productId = Array.isArray(id) ? id[0] : id;
   const pcId = Array.isArray(colorId) ? colorId[0] : colorId;
+  const canView = hasPermission('productColorSize.view');
 
   const [rows, setRows] = useState([]);
   const [ProductName, setProductName] = useState('');
@@ -27,6 +28,7 @@ export default function Page() {
   };
 
   useEffect(() => {
+    if (!canView) return;
     if (!pcId) return;
     load();
   }, [pcId]);

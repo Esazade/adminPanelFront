@@ -8,8 +8,10 @@ import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [items, setItems] = useState([]);
-
+  const canView = hasPermission('color.view');
+  
   useEffect(() => {
+    if (!canView) return;
     (async () => {
       try {
         const data = await listColors();

@@ -70,3 +70,21 @@ export async function deleteCategory(id) {
   if (!res.ok) throw new Error(await res.text() || 'delete category failed');
   return true;
 }
+
+export async function importCategoryExcel(id, file) {
+  const form = new FormData();
+  form.append('file', file);
+
+  const headers = { ...(authHeaders() || {}) };
+  delete headers['Content-Type'];
+
+  const res = await fetch(`${API}/category/${id}/import-excel`, {
+    method: 'POST',
+    headers,
+    body: form,
+  });
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+  return data;
+}

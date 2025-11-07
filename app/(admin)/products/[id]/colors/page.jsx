@@ -10,11 +10,13 @@ import { hasPermission } from '@/lib/auth-client';
 export default function Page({ params }) { 
   const { id } = useParams();                         
   const productId = Array.isArray(id) ? id[0] : id; 
+  const canView = hasPermission('productColor.view');
 
   const [rows, setRows] = useState([]);
   const [ProductName, setProductName] = useState('');
 
   useEffect(() => {
+    if (!canView) return;
     (async () => {
       try {
         const data = await listProductColors(productId); 

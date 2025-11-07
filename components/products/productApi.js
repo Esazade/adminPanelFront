@@ -5,19 +5,13 @@ import { authHeaders } from '@/lib/auth-client';
 
 export async function listProducts(params = {}) {
   const qs = new URLSearchParams(params).toString();
-
   const res = await fetch(`${API}/product${qs ? `?${qs}` : ''}`, {
     method: 'GET',
     headers: authHeaders(),
-    cache: 'no-store', 
+    cache: 'no-store',
   });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(errorText || 'list brands failed');
-  }
-
-  return res.json();
+  if (!res.ok) throw new Error(await res.text() || 'list products failed');
+  return res.json(); 
 }
 
 export async function getProduct(id) {

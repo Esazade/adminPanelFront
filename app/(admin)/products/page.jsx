@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listProducts, deleteProduct } from '@/components/products/productApi';
 import RequirePermission from '@/components/auth/RequirePermission';
@@ -8,33 +8,75 @@ import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [products, setProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await listProducts();
-        setProducts(data);
-      } catch(err) {
-        console.error(err.message);
-      }
-    })();
-  }, []);
+  const canView = hasPermission('product.view');
+
+  const load = async (p = page, cat = selectedCategory) => {
+    const { items, total } = await listProducts({
+      page: p,
+      pageSize,
+      ...(cat ? { categoryId: cat } : {}),
+    });
+    setProducts(items || []);
+    setTotal(total || 0);
+    setPage(p);
+  };
+
+  useEffect(() => { if (canView) load(1); }, [canView]); // اولین بار
+
+  // وقتی دسته عوض شد، برو صفحه 1
+  useEffect(() => { if (canView) load(1, selectedCategory); }, [selectedCategory]);
 
   const onDelete = async (id) => {
     if (!confirm('حذف شود؟')) return;
     try {
       await deleteProduct(id);
-      setProducts(prev => prev.filter(p => p.ID !== id));
+      // اگر آخرین آیتم صفحه حذف شد ممکن است خالی شود؛ ساده: دوباره لود کن
+      load(page);
     } catch {
       alert('خطا در حذف محصول');
     }
   };
 
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const categories = useMemo(() => {
+    const map = new Map();
+    products.forEach((p) => {
+      const id = p.CategoryID != null ? String(p.CategoryID) : '';
+      if (!id) return;
+      const name = p.CategoryName || id;
+      if (!map.has(id)) map.set(id, name);
+    });
+    return [{ id: '', name: 'همه دسته‌ها' }, ...Array.from(map, ([id, name]) => ({ id, name }))];
+  }, [products]);
+
   return (
     <RequirePermission code="product.view">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">محصولات</h1>
-        <Link href="/products/new" className="px-3 py-2 rounded bg-blue-600 text-white">محصول جدید</Link>
+        <Link href="/products/new" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">
+          محصول جدید
+        </Link>
+      </div>
+
+      <div className="mb-3 flex gap-3 items-center">
+        <label className="text-sm text-slate-600">فیلتر بر اساس دسته بندی:</label>
+        <select
+          className="px-3 py-2 border rounded-lg bg-white text-sm"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map((c) => (
+            <option key={c.id || 'all'} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="overflow-x-auto bg-white border border-slate-200 rounded-xl">
@@ -54,7 +96,7 @@ export default function Page() {
           <tbody className="text-center">
             {products.map((p, i) => (
               <tr key={p.ID} className="border-t">
-                <td className="px-3 py-2">{i + 1}</td>
+                <td className="px-3 py-2">{(page - 1) * pageSize + i + 1}</td>
                 <td className="px-3 py-2">{p.Name}</td>
                 <td className="px-3 py-2">{p.Slug ?? '—'}</td>
                 <td className="px-3 py-2">{p.BasePrice ?? '—'}</td>
@@ -63,13 +105,19 @@ export default function Page() {
                 <td className="px-3 py-2">{p.BrandName ?? p.BrandID ?? '—'}</td>
                 <td className="px-3 py-2">
                   {hasPermission('productColor.view') && (
-                    <Link href={`/products/${p.ID}/colors`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">رنگ های محصول</Link>
+                    <Link href={`/products/${p.ID}/colors`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">
+                      رنگ های محصول
+                    </Link>
                   )}
                   {hasPermission('product.update') && (
-                    <Link href={`/products/${p.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
+                    <Link href={`/products/${p.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">
+                      ویرایش
+                    </Link>
                   )}
                   {hasPermission('product.delete') && (
-                    <button onClick={() => onDelete(p.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
+                    <button onClick={() => onDelete(p.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">
+                      حذف
+                    </button>
                   )}
                 </td>
               </tr>
@@ -82,6 +130,31 @@ export default function Page() {
           </tbody>
         </table>
       </div>
-    </RequirePermission >
+
+      {/* Pagination */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-slate-600">
+          نمایش {(products.length ? (page - 1) * pageSize + 1 : 0)}–
+          {(page - 1) * pageSize + products.length} از {total}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            disabled={page <= 1}
+            onClick={() => load(page - 1)}
+          >
+            قبلی
+          </button>
+          <span className="text-sm text-slate-600">صفحه {page} از {totalPages}</span>
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            disabled={page >= totalPages}
+            onClick={() => load(page + 1)}
+          >
+            بعدی
+          </button>
+        </div>
+      </div>
+    </RequirePermission>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createUser, updateUser, getUser, listRoles } from '@/components/users/userApi'; 
+import { updateUser, getUser, listRoles } from '@/components/users/userApi'; 
 import Link from 'next/link';
 
 export default function UserForm({ userId }) {
@@ -67,11 +67,13 @@ export default function UserForm({ userId }) {
         Role: Number(form.role),
       };
 
-      if (isNew) {
-        await createUser(payload); 
-      } else {
-        await updateUser(userId, payload); 
-      }
+      await updateUser(userId, payload); 
+
+      // if (isNew) {
+      //   await createUser(payload); 
+      // } else {
+      //   await updateUser(userId, payload); 
+      // }
 
       window.location.href = '/users';
     } catch (err) {

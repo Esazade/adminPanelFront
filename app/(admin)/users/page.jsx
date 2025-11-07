@@ -8,8 +8,10 @@ import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [users, setUsers] = useState([]);
+  const canView = hasPermission('user.view');
 
   useEffect(() => {
+    if (!canView) return;
     (async () => {
       try {
         const data = await listUsers();
