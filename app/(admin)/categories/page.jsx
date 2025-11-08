@@ -50,7 +50,15 @@ export default function Page() {
 
     setUploadingId(targetCat.ID);
     try {
-      await importCategoryExcel(targetCat.ID, file);
+      const resp = await importCategoryExcel(targetCat.ID, file); // ← نتیجه را بگیر
+      const newCount = resp.productCount ?? resp.summary?.productCount ?? 0;
+
+      setCats(prev =>
+        prev.map(c =>
+          c.ID === targetCat.ID ? { ...c, ProductCount: newCount } : c
+        )
+      );
+
       alert('فایل ارسال شد و پردازش انجام شد.');
     } catch (err) {
       console.error(err);
@@ -60,6 +68,7 @@ export default function Page() {
       setTargetCat(null);
     }
   };
+
 
   const onDelete = async (id) => {
     if (!confirm('حذف شود؟')) return;
@@ -73,16 +82,15 @@ export default function Page() {
 
   return (
     <RequirePermission code="category.view">
-      {/* هدر دو-سطری مثل نمونه قبلی */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <Link href="/categories/new" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">
             گروه جدید
           </Link>
           <h1 className="text-2xl font-semibold">گروه ها</h1>
         </div>
 
-        <div className="mt-3 flex gap-3 items-center justify-end">
+        <div className="mt-3 flex gap-3 items-center ">
           <label className="text-sm text-slate-600">فیلتر بر اساس والد:</label>
           <select
             value={parentFilter}

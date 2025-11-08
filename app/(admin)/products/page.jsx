@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listProducts, deleteProduct } from '@/components/products/productApi';
+import { FilteredCategory } from '@/components/categories/categoryApi';
 import RequirePermission from '@/components/auth/RequirePermission';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [products, setProducts] = useState([]);
+  const [categoris, setCategoris] = useState([]); 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -26,9 +28,22 @@ export default function Page() {
     setPage(p);
   };
 
-  useEffect(() => { if (canView) load(1); }, [canView]); // اولین بار
+  const loadCategories = async () => {
+    const all = await FilteredCategory();
+    const opts = all.map(c => ({
+      id: String(c.ID),
+      name: c.ParentName ? `${c.ParentName} ${c.Name}` : c.Name,
+    }));
+    setCategoris([{ id: '', name: 'همه دسته‌ها' }, ...opts]);
+  };
 
-  // وقتی دسته عوض شد، برو صفحه 1
+  useEffect(() => {
+    if (canView) {
+      load(1);
+      loadCategories();
+    }
+  }, [canView]);
+
   useEffect(() => { if (canView) load(1, selectedCategory); }, [selectedCategory]);
 
   const onDelete = async (id) => {
@@ -43,17 +58,6 @@ export default function Page() {
   };
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  const categories = useMemo(() => {
-    const map = new Map();
-    products.forEach((p) => {
-      const id = p.CategoryID != null ? String(p.CategoryID) : '';
-      if (!id) return;
-      const name = p.CategoryName || id;
-      if (!map.has(id)) map.set(id, name);
-    });
-    return [{ id: '', name: 'همه دسته‌ها' }, ...Array.from(map, ([id, name]) => ({ id, name }))];
-  }, [products]);
 
   return (
     <RequirePermission code="product.view">
@@ -71,10 +75,8 @@ export default function Page() {
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
-          {categories.map((c) => (
-            <option key={c.id || 'all'} value={c.id}>
-              {c.name}
-            </option>
+          {categoris.map(c => (
+            <option key={c.id || 'all'} value={c.id}>{c.name}</option>
           ))}
         </select>
       </div>

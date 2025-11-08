@@ -16,6 +16,16 @@ export async function listCategories(params = {}) {
   return res.json();
 }
 
+export async function FilteredCategory(id) {
+  const res = await fetch(`${API}/category/filter`, {
+      method: 'GET',
+      headers: authHeaders(),
+      cache: 'no-store', 
+  });
+  if (!res.ok) throw new Error('get category failed');
+  return res.json();
+}
+
 export async function getParentCategory(id) {
   const res = await fetch(`${API}/category/parents`, {
       method: 'GET',
