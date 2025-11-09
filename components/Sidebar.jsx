@@ -70,10 +70,12 @@ export default function Sidebar({ isOpen = false, onClose }) {
       { label: 'برندها', href: '/brands' },
       { label: 'رنگ‌ها', href: '/color' },
     ]},
-
     { type: 'section', title: 'کاربران', icon: RectangleGroupIcon, items: [
       { label: 'کاربران', href: '/users' },
       { label: 'تعریف نقش کاربران', href: '/roles' },
+    ]},
+    { type: 'section', title: 'تنظیمات', icon: RectangleGroupIcon, items: [
+      { label: 'اسلایدر', href: '/sliders' },
     ]},
   ];
 
