@@ -5,15 +5,15 @@ import { useEffect, useState } from 'react';
 import { listSliderItems, deleteSliderItem } from '@/components/sliders/sliderItemApi';
 
 export default function Page({ params }) {
-  const { sliderId } = useParams(); 
+  const { id } = useParams(); 
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const data = await listSliderItems(sliderId);
+      const data = await listSliderItems(id);
       setItems(data);
     })();
-  }, [sliderId]);
+  }, [id]);
 
   const onDelete = async (id) => {
     if (!confirm('حذف شود؟')) return;
@@ -24,10 +24,10 @@ export default function Page({ params }) {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">آیتم‌های اسلایدر #{sliderId}</h1>
+        <h1 className="text-2xl font-semibold">آیتم‌های اسلایدر #{id}</h1>
         <div className="flex gap-2">
           <Link href={`/sliders`} className="px-3 py-2 rounded border">بازگشت</Link>
-          <Link href={`/sliders/${sliderId}/items/new`} className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">
+          <Link href={`/sliders/${id}/items/new`} className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">
             آیتم جدید
           </Link>
         </div>
@@ -60,7 +60,7 @@ export default function Page({ params }) {
                 </td>
                 <td className="px-3 py-2">{it.IsActive ? '✅' : '❌'}</td>
                 <td className="px-3 py-2">
-                  <Link href={`/sliders/${sliderId}/items/${it.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
+                  <Link href={`/sliders/${id}/items/${it.ID}`} className="px-2 py-1 border rounded hover:bg-slate-50 ml-2">ویرایش</Link>
                   <button onClick={() => onDelete(it.ID)} className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">حذف</button>
                 </td>
               </tr>

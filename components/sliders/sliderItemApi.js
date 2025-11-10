@@ -1,7 +1,7 @@
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:5000';
 import { authHeaders } from '@/lib/auth-client';
 
-export async function listSliderItems(sliderId) {
+export async function listSliderItems(sliderId) { 
   const res = await fetch(`${API}/sliders/${sliderId}/items`, {
     headers: authHeaders(),
     cache: 'no-store'
