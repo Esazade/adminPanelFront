@@ -10,17 +10,18 @@ export async function listSliderItems(sliderId) {
   return res.json();
 }
 
-export async function getSliderItem(id) {
-  const res = await fetch(`${API}/sliders/items/${id}`, {   
-    headers: authHeaders(),
-    cache: 'no-store'
-  });
+export async function getSliderItem(sliderId,itemId) {
+  const res = await fetch(`${API}/sliders/${sliderId}/items/${itemId}`, {
+  headers: authHeaders(),
+  cache: 'no-store'
+});
+
   if (!res.ok) throw new Error('get item failed');
   return res.json();
 }
 
-export async function createSliderItem(data) {
-  const res = await fetch(`${API}/sliders/items`, {         
+export async function createSliderItem(sliderId,data) { console.log("sliderId",sliderId,"data",data);
+  const res = await fetch(`${API}/sliders/${sliderId}/items`, {         
     method: 'POST',
     headers: {
       ...authHeaders(),

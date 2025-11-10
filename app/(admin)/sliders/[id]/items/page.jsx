@@ -8,6 +8,10 @@ export default function Page({ params }) {
   const { id } = useParams(); 
   const [items, setItems] = useState([]);
 
+  // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
+  const API = 'http://localhost:5000';
+  const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`);
+
   useEffect(() => {
     (async () => {
       const data = await listSliderItems(id);
@@ -48,6 +52,7 @@ export default function Page({ params }) {
           </thead>
           <tbody className="text-center">
             {items.map((it, i) => (
+              
               <tr key={it.ID} className="border-t">
                 <td className="px-3 py-2">{i + 1}</td>
                 <td className="px-3 py-2">{it.Title}</td>
@@ -56,7 +61,7 @@ export default function Page({ params }) {
                   <a href={it.LinkUrl} target="_blank" className="text-blue-600 underline">{it.LinkUrl}</a>
                 </td>
                 <td className="px-3 py-2">
-                  {it.ImageUrl ? <img src={it.ImageUrl} className="h-8 mx-auto" /> : <span className="text-slate-400">بدون تصویر</span>}
+                  {it.ImageUrl ? <img src={toAbs(it.ImageUrl)} className="h-8 mx-auto" /> : <span className="text-slate-400">بدون تصویر</span>}
                 </td>
                 <td className="px-3 py-2">{it.IsActive ? '✅' : '❌'}</td>
                 <td className="px-3 py-2">

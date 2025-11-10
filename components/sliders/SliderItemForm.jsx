@@ -4,8 +4,9 @@ import { createSliderItem, updateSliderItem, getSliderItem } from '@/components/
 import { uploadFile } from '@/lib/upload';
 import Link from 'next/link';
 
-export default function SliderItemForm({ sliderId, itemId }) {
-  const isNew = itemId === 'new';
+export default function SliderItemForm({ sliderId, itemId }) { 
+  const isNew = itemId === 'new';  
+   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
   const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`);
 
@@ -32,7 +33,7 @@ export default function SliderItemForm({ sliderId, itemId }) {
   useEffect(() => {
     if (isNew) { setLoading(false); return; }
     (async () => {
-      const it = await getSliderItem(itemId);
+      const it = await getSliderItem(sliderId,itemId);
       setForm({
         title: it.Title ?? '',
         subTitle: it.SubTitle ?? '',
@@ -47,9 +48,10 @@ export default function SliderItemForm({ sliderId, itemId }) {
     })();
   }, [isNew, itemId]);
 
-  const onSubmit = async (e) => {
+  const onSubmit = async (e) => { 
     e.preventDefault();
     setSaving(true);
+
     try {
       let imageUrl = form.imageUrl;
       let mobileImageUrl = form.mobileImageUrl;
@@ -69,13 +71,13 @@ export default function SliderItemForm({ sliderId, itemId }) {
         SubTitle: form.subTitle,
         ButtonText: form.buttonText,
         LinkUrl: form.linkUrl,
-        OpenInNewTab: form.openInNewTab ? 1 : 0,
+        OpenInNewTab: form.openInNewTab,
         ImageUrl: imageUrl,
         MobileImageUrl: mobileImageUrl,
-        IsActive: form.isActive ? 1 : 0,
+        IsActive: form.isActive,
       };
 
-      if (isNew) await createSliderItem(payload);
+      if (isNew) await createSliderItem(sliderId,payload);
       else await updateSliderItem(itemId, payload);
       window.location.href = `/sliders/${sliderId}/items`;
     } catch (err) {
