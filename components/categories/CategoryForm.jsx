@@ -3,19 +3,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { createCategory, updateCategory, getCategory,getParentCategory, listCategories } from './categoryApi';
+import DialogBox from '@/components/ui/DialogBox';
 
 export default function CategoryForm({ categoryId }) {
   const isNew = categoryId === 'new';
-
+  const [allCats, setAllCats] = useState([]);
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [form, setForm] = useState({
     name: '',
     description: '',
     parentCategoryId: null,
     isDelete: false,
   });
-  const [allCats, setAllCats] = useState([]);
-  const [loading, setLoading] = useState(!isNew);
-  const [saving, setSaving] = useState(false);
+  
 
   const parents = useMemo(
     () => allCats.filter(c => c.ID !== (isNew ? 0 : Number(categoryId))),
@@ -47,7 +49,7 @@ export default function CategoryForm({ categoryId }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { alert('نام الزامی است'); return; }
+    if (!form.name.trim()) {  setDialog({type: 'error',message: 'نام کتگوری الزامی است',}); return; }
     setSaving(true);
     try {
       const payload = {
@@ -108,6 +110,14 @@ export default function CategoryForm({ categoryId }) {
         </button>
         <Link href="/categories" className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">انصراف</Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

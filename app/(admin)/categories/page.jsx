@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { listCategories, deleteCategory, importCategoryExcel } from '@/components/categories/categoryApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
@@ -11,6 +12,7 @@ export default function Page() {
   const [parentFilter, setParentFilter] = useState('all');
   const [targetCat, setTargetCat] = useState(null);  
   const [uploadingId, setUploadingId] = useState(null);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const fileInputRef = useRef(null);
 
   const canView = hasPermission('category.view');
@@ -50,7 +52,7 @@ export default function Page() {
 
     setUploadingId(targetCat.ID);
     try {
-      const resp = await importCategoryExcel(targetCat.ID, file); // ← نتیجه را بگیر
+      const resp = await importCategoryExcel(targetCat.ID, file);
       const newCount = resp.productCount ?? resp.summary?.productCount ?? 0;
 
       setCats(prev =>
@@ -58,26 +60,30 @@ export default function Page() {
           c.ID === targetCat.ID ? { ...c, ProductCount: newCount } : c
         )
       );
-
-      alert('فایل ارسال شد و پردازش انجام شد.');
+      
+      setDialog({ type: 'info', message: 'فایل ارسال شد و پردازش انجام شد.' });
     } catch (err) {
       console.error(err);
-      alert(err.message || 'ارسال فایل ناموفق بود.');
+      setDialog({ type: 'error', message: 'ارسال فایل ناموفق بود.' });
     } finally {
       setUploadingId(null);
       setTargetCat(null);
     }
   };
 
-
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteCategory(id);
-      setCats(prev => prev.filter(c => c.ID !== id));
-    } catch {
-      alert('خطا در حذف دسته');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این کتگوری مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteCategory(id);
+          setCats(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف دسته' });
+        }
+      }
+    });
   };
 
   return (
@@ -174,6 +180,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }
