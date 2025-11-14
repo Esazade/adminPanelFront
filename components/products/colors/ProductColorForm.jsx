@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createProductColor, updateProductColor, getProductColor } from '@/components/products/colors/productColorApi';
+import DialogBox from '@/components/ui/DialogBox';
 import { listColors } from '@/components/colors/colorApi';
 
 export default function ProductColorForm({ productId, pcId }) {
   const isNew = pcId === 'new';
-
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [form, setForm] = useState({
     ColorID: 0,
     SKU: '',
@@ -35,7 +36,7 @@ export default function ProductColorForm({ productId, pcId }) {
           SKU: row.SKU ?? '',
         });
       } catch {
-        alert('خطا در دریافت رنگ');
+        setDialog({type: 'error',message: 'خطا در دریافت رنگ',});
       } finally {
         setLoading(false);
       }
@@ -59,7 +60,7 @@ export default function ProductColorForm({ productId, pcId }) {
       }
       window.location.href = `/products/${productId}/colors`;
     } catch (err) {
-      alert(`خطا: ${err.message || 'ثبت رنگ ناموفق بود'}`);
+      setDialog({type: 'error',message: `خطا: ${err.message || 'ثبت رنگ ناموفق بود'}`,});
     } finally {
       setSaving(false);
     }
@@ -96,6 +97,14 @@ export default function ProductColorForm({ productId, pcId }) {
         </button>
         <Link href={`/products/${productId}/colors`} className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">انصراف</Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

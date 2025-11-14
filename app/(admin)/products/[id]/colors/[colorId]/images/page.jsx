@@ -5,12 +5,14 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { listImages, deleteImage, moveUpImage, moveDownImage } from '@/components/products/colors/images/productColorImageApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const { id, colorId } = useParams();
   const productId = Array.isArray(id) ? id[0] : id;
   const pcId = Array.isArray(colorId) ? colorId[0] : colorId;
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('productColorImage.view');
 
   const [rows, setRows] = useState([]);
@@ -37,14 +39,19 @@ export default function Page() {
     loadData();
   }, [pcId]);
 
-  const onDelete = async (imageId) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteImage(imageId);
-      setRows(prev => prev.filter(x => x.ID !== imageId));
-    } catch {
-      alert('خطا در حذف تصویر');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این تصویر مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteImage(id);
+          setRows(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف تصویر' });
+        }
+      }
+    });
   };
 
   const onMoveUp = async (id) => {
@@ -52,7 +59,7 @@ export default function Page() {
       await moveUpImage(id);
       await loadData();
     } catch {
-      alert('خطا در تغییر ترتیب');
+      setDialog({ type: 'error', message: 'خطا در تغییر ترتیب' });
     }
   };
 
@@ -61,7 +68,7 @@ export default function Page() {
       await moveDownImage(id);
       await loadData();
     } catch {
-      alert('خطا در تغییر ترتیب');
+      setDialog({ type: 'error', message: 'خطا در تغییر ترتیب' });
     }
   };
 
@@ -128,6 +135,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission >
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createSlider, updateSlider, getSlider } from '@/components/sliders/sliderApi';
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function SliderForm({ sliderId }) {
   const isNew = sliderId === 'new';
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [form, setForm] = useState({
     name: '',
     placement: '',
@@ -44,7 +46,7 @@ export default function SliderForm({ sliderId }) {
       else await updateSlider(sliderId, payload);
       window.location.href = '/sliders';
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      setDialog({type: 'error',message: `خطا: ${err.message}`,});
     } finally {
       setSaving(false);
     }
@@ -101,6 +103,14 @@ export default function SliderForm({ sliderId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

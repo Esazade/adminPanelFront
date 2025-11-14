@@ -3,10 +3,12 @@
 import { createBrand, updateBrand, getBrand } from '@/components/brands/brandApi';
 import { uploadFile } from '@/lib/upload';
 import { useEffect, useMemo, useState } from 'react';
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function BrandForm({ brandId }) {
   const isNew = brandId === 'new';
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
   const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`);
@@ -51,8 +53,8 @@ export default function BrandForm({ brandId }) {
   const onLogoChange = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!f.type.startsWith('image/')) { alert('فقط فایل تصویری مجاز است'); return; }
-    if (f.size > 2 * 1024 * 1024) { alert('حداکثر حجم 2MB'); return; }
+    if (!f.type.startsWith('image/')) { setDialog({type: 'error',message: 'فقط فایل تصویری مجاز است',}); return; }
+    if (f.size > 2 * 1024 * 1024) { setDialog({type: 'error',message: 'حداکثر حجم 2MB',}); return; }
     setLogoFile(f);
   };
 
@@ -149,6 +151,14 @@ export default function BrandForm({ brandId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

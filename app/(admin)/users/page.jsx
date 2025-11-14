@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { listUsers, deleteUser } from '@/components/users/userApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [users, setUsers] = useState([]);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('user.view');
 
   useEffect(() => {
@@ -28,14 +30,19 @@ export default function Page() {
     return m;
   }, [users]);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteUser(id);
-      setUsers(prev => prev.filter(c => c.ID !== id));
-    } catch {
-      alert('خطا در حذف کاربر');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این کاربر مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteUser(id);
+          setUsers(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف کاربر' });
+        }
+      }
+    });
   };
 
   return (
@@ -81,6 +88,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission >
   );
 }

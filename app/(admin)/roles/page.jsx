@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { listRoles, deleteRole } from '@/components/roles/roleApi';
 import PermissionsModal from '@/components/roles/PermissionsModal';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [Roles, setRoles] = useState([]);
   const [openRole, setOpenRole] = useState(null);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('role.view');
 
   useEffect(() => {
@@ -30,14 +32,19 @@ export default function Page() {
     return m;
   }, [Roles]);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteRole(id);
-      setRoles(prev => prev.filter(c => c.ID !== id));
-    } catch {
-      alert('خطا در حذف نقش');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این نقش مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteRole(id);
+          setRoles(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف نقش' });
+        }
+      }
+    });
   };
 
   return (
@@ -88,6 +95,14 @@ export default function Page() {
         )}
 
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { createColor, updateColor, getColor } from './colorApi';
+import DialogBox from '@/components/ui/DialogBox';
 import { HexColorPicker } from 'react-colorful';
 
 function normalizeHex(v) {
@@ -16,6 +17,7 @@ function normalizeHex(v) {
 
 export default function ColorForm({ colorId }) {
   const isNew = colorId === 'new';
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
 
   const [form, setForm] = useState({
     name: '',
@@ -45,7 +47,7 @@ export default function ColorForm({ colorId }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { alert('نام الزامی است'); return; }
+    if (!form.name.trim()) { setDialog({type: 'error',message: 'نام الزامی است',}); return; }
 
     const payload = {
       Name: form.name,
@@ -120,6 +122,14 @@ export default function ColorForm({ colorId }) {
         </button>
         <Link href="/colors" className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">انصراف</Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

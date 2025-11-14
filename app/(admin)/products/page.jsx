@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { listProducts, deleteProduct } from '@/components/products/productApi';
 import { FilteredCategory } from '@/components/categories/categoryApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [products, setProducts] = useState([]);
   const [categoris, setCategoris] = useState([]); 
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
@@ -46,15 +48,19 @@ export default function Page() {
 
   useEffect(() => { if (canView) load(1, selectedCategory); }, [selectedCategory]);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteProduct(id);
-      // اگر آخرین آیتم صفحه حذف شد ممکن است خالی شود؛ ساده: دوباره لود کن
-      load(page);
-    } catch {
-      alert('خطا در حذف محصول');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این محصول مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteProduct(id);
+          load(page);
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف محصول' });
+        }
+      }
+    });
   };
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -157,6 +163,14 @@ export default function Page() {
           </button>
         </div>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }

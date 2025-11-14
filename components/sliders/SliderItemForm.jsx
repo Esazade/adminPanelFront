@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createSliderItem, updateSliderItem, getSliderItem } from '@/components/sliders/sliderItemApi';
 import { uploadFile } from '@/lib/upload';
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function SliderItemForm({ sliderId, itemId }) { 
   const isNew = itemId === 'new';  
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
    // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
   const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`);
@@ -81,7 +83,7 @@ export default function SliderItemForm({ sliderId, itemId }) {
       else await updateSliderItem(itemId, payload);
       window.location.href = `/sliders/${sliderId}/items`;
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      setDialog({type: 'error',message: `خطا: ${err.message}`,});
     } finally {
       setSaving(false);
     }
@@ -143,6 +145,14 @@ export default function SliderItemForm({ sliderId, itemId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { listProductColors, deleteProductColor } from '@/components/products/colors/productColorApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page({ params }) { 
   const { id } = useParams();                         
   const productId = Array.isArray(id) ? id[0] : id; 
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('productColor.view');
 
   const [rows, setRows] = useState([]);
@@ -28,15 +30,20 @@ export default function Page({ params }) {
       }
     })();
   }, [productId]);
-
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteProductColor(id);
-      setRows(prev => prev.filter(r => r.ID !== id));
-    } catch {
-      alert('خطا در حذف رنگ');
-    }
+  
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این رنگ مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteProductColor(id);
+          setRows(prev => prev.filter(r => r.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف رنگ' });
+        }
+      }
+    });
   };
 
   return (
@@ -91,6 +98,14 @@ export default function Page({ params }) {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission >
   );
 }

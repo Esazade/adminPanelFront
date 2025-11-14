@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listBrands, deleteBrand } from '@/components/brands/brandApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [brands, setBrands] = useState([]);
   const canView = hasPermission('brand.view');
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
 
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000'
   const API = 'http://localhost:5000'
@@ -25,15 +27,20 @@ export default function Page() {
     })();
   }, []);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteBrand(id);
-      setBrands(prev => prev.filter(b => b.ID !== id));
-    } catch {
-      alert('خطا در حذف برند');
-    }
-  };
+  const onDelete = (id) => {
+      setDialog({
+        type: 'confirm',
+        message: 'آیا از حذف این برند مطمئن هستید؟',
+        onConfirm: async () => {
+          try {
+            await deleteBrand(id);
+            setBrands(prev => prev.filter(b => b.ID !== id));
+          } catch {
+            setDialog({ type: 'error', message: 'خطا در حذف برند' });
+          }
+        }
+      });
+    };
 
   return (
     <RequirePermission code="brand.view">
@@ -83,6 +90,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }

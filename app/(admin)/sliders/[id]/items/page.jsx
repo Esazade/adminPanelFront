@@ -2,11 +2,13 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import DialogBox from '@/components/ui/DialogBox';
 import { listSliderItems, deleteSliderItem } from '@/components/sliders/sliderItemApi';
 
 export default function Page({ params }) {
   const { id } = useParams(); 
   const [items, setItems] = useState([]);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
 
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
@@ -19,10 +21,19 @@ export default function Page({ params }) {
     })();
   }, [id]);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    await deleteSliderItem(id);
-    setItems(prev => prev.filter(x => x.ID !== id));
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این اسلایدر مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteSliderItem(id);
+          setItems(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف اسلایدر' });
+        }
+      }
+    });
   };
 
   return (
@@ -73,6 +84,14 @@ export default function Page({ params }) {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </div>
   );
 }

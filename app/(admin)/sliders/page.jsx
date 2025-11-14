@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { listSliders, deleteSlider } from '@/components/sliders/sliderApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [sliders, setSliders] = useState([]);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('siteSettings.view');
 
   useEffect(() => {
@@ -17,14 +19,19 @@ export default function Page() {
     })();
   }, []);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteSlider(id);
-      setSliders(prev => prev.filter(s => s.ID !== id));
-    } catch {
-      alert('خطا در حذف اسلایدر');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این اسلایدر مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteSlider(id);
+          setSliders(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف اسلایدر' });
+        }
+      }
+    });
   };
 
   return (
@@ -70,6 +77,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }

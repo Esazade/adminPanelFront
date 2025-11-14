@@ -4,9 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { uploadFile } from '@/lib/upload';
 import { createImage, updateImage, getImage } from '@/components/products/colors/images/productColorImageApi';
+import DialogBox from '@/components/ui/DialogBox';
 
 export default function ProductColorImageForm({ productId, pcId, imageId }) {
   const isNew = imageId === 'new';
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
 
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
@@ -41,7 +43,7 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
           IsMain: !!row?.IsMain,
         });
       } catch {
-        alert('خطا در دریافت تصویر');
+        setDialog({type: 'error',message: 'خطا در دریافت تصویر',});
       } finally {
         setLoading(false);
       }
@@ -53,8 +55,8 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
   const onFileChange = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!f.type.startsWith('image/')) { alert('فقط فایل تصویری مجاز است'); return; }
-    if (f.size > 2 * 1024 * 1024) { alert('حداکثر حجم 2MB'); return; }
+    if (!f.type.startsWith('image/')) { setDialog({type: 'error',message: 'فقط فایل تصویری مجاز است',}); return; }
+    if (f.size > 2 * 1024 * 1024) { setDialog({type: 'error',message: 'حداکثر حجم 2MB',}); return; }
     setImageFile(f);
   };
 
@@ -73,7 +75,7 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
       }
 
       if (isNew && !imageUrl) {
-        alert('انتخاب تصویر الزامی است');
+        setDialog({type: 'error',message: 'انتخاب تصویر الزامی است',});
         setSaving(false);
         return;
       }
@@ -88,7 +90,7 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
 
       window.location.href = `/products/${productId}/colors/${pcId}/images`;
     } catch (err) {
-      alert(err?.message || 'ثبت تصویر ناموفق بود');
+      setDialog({type: 'error',message: 'ثبت تصویر ناموفق بود',});
     } finally {
       setSaving(false);
     }
@@ -157,6 +159,14 @@ export default function ProductColorImageForm({ productId, pcId, imageId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

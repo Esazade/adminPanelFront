@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listColors, deleteColor } from '@/components/colors/colorApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const [items, setItems] = useState([]);
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('color.view');
   
   useEffect(() => {
@@ -22,14 +24,19 @@ export default function Page() {
     })();
   }, []);
 
-  const onDelete = async (id) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteColor(id);
-      setItems(prev => prev.filter(x => x.ID !== id));
-    } catch {
-      alert('خطا در حذف رنگ');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این رنگ مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteColor(id);
+          setItems(prev => prev.filter(x => x.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف رنگ' });
+        }
+      }
+    });
   };
 
   return (
@@ -76,6 +83,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }

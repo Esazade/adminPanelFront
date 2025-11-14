@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createSize, updateSize, getSize } from '@/components/products/colors/sizes/productColorSizeApi';
+import DialogBox from '@/components/ui/DialogBox';
 
 export default function ProductColorSizeForm({ productId, pcId, sizeId }) {
   const isNew = sizeId === 'new';
-
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [form, setForm] = useState({
     Size: '',
     Stock: '',
@@ -24,7 +25,7 @@ export default function ProductColorSizeForm({ productId, pcId, sizeId }) {
           Stock: row?.Stock ?? '',
         });
       } catch {
-        alert('خطا در دریافت اطلاعات');
+        setDialog({type: 'error',message: 'خطا در دریافت اطلاعات',});
       } finally {
         setLoading(false);
       }
@@ -47,7 +48,7 @@ export default function ProductColorSizeForm({ productId, pcId, sizeId }) {
 
       window.location.href = `/products/${productId}/colors/${pcId}/sizes`;
     } catch (err) {
-      alert(err?.message || 'ثبت سایز ناموفق بود');
+      setDialog({type: 'error',message: 'ثبت سایز ناموفق بود',});
     } finally {
       setSaving(false);
     }
@@ -101,6 +102,14 @@ export default function ProductColorSizeForm({ productId, pcId, sizeId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

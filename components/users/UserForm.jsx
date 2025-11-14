@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { updateUser, getUser, listRoles } from '@/components/users/userApi'; 
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function UserForm({ userId }) {
   const isNew = userId === 'new';
-
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const [form, setForm] = useState({
     UserName: '',
     Email: '',
@@ -26,7 +27,7 @@ export default function UserForm({ userId }) {
         const roleData = await listRoles();
         setRoles(roleData);
       } catch (err) {
-        alert('خطا در دریافت نقش‌ها');
+        setDialog({type: 'error',message: 'خطا در دریافت نقش‌ها',});
       }
     })();
 
@@ -77,7 +78,7 @@ export default function UserForm({ userId }) {
 
       window.location.href = '/users';
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      setDialog({type: 'error',message: `خطا: ${err.message}`,});
     } finally {
       setSaving(false);
     }
@@ -162,6 +163,14 @@ export default function UserForm({ userId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { createRole, updateRole, getRole, listRoles } from '@/components/roles/roleApi'; 
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function RoleForm({ RoleId }) {
   const isNew = RoleId === 'new';
-
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
+  
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -50,7 +52,7 @@ export default function RoleForm({ RoleId }) {
 
       window.location.href = '/roles';
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      setDialog({type: 'error',message: `خطا: ${err.message}`,});
     } finally {
       setSaving(false);
     }
@@ -90,6 +92,14 @@ export default function RoleForm({ RoleId }) {
           انصراف
         </Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

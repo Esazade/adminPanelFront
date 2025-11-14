@@ -5,11 +5,16 @@ import { useEffect, useState } from 'react';
 import { createProduct, updateProduct, getProduct } from '@/components/products/productApi';
 import { listCategories } from '@/components/categories/categoryApi';
 import { listBrands } from '@/components/brands/brandApi';
+import DialogBox from '@/components/ui/DialogBox';
 import Link from 'next/link';
 
 export default function ProductForm({ productId }) {
   const isNew = productId === 'new';
-
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     Name: '',
     Slug: '',
@@ -20,10 +25,7 @@ export default function ProductForm({ productId }) {
     Description: '',
   });
 
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(!isNew);
-  const [saving, setSaving] = useState(false);
+  
 
   useEffect(() => {
     (async () => {
@@ -49,7 +51,7 @@ export default function ProductForm({ productId }) {
           Description: p.Description ?? '',
         });
       } catch {
-        alert('خطا در دریافت محصول');
+        setDialog({type: 'error',message: 'خطا در دریافت محصول',});
       } finally {
         setLoading(false);
       }
@@ -79,7 +81,7 @@ export default function ProductForm({ productId }) {
       }
       window.location.href = '/products';
     } catch (err) {
-      alert(`خطا: ${err.message || 'ثبت محصول ناموفق بود'}`);
+      setDialog({type: 'error',message: `خطا: ${err.message || 'ثبت محصول ناموفق بود'}`,});
     } finally {
       setSaving(false);
     }
@@ -150,6 +152,14 @@ export default function ProductForm({ productId }) {
         </button>
         <Link href="/products" className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">انصراف</Link>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '' })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </form>
   );
 }

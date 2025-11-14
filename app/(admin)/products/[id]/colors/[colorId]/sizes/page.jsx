@@ -5,12 +5,14 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { listSizes, deleteSize } from '@/components/products/colors/sizes/productColorSizeApi';
 import RequirePermission from '@/components/auth/RequirePermission';
+import DialogBox from '@/components/ui/DialogBox';
 import { hasPermission } from '@/lib/auth-client';
 
 export default function Page() {
   const { id, colorId } = useParams();
   const productId = Array.isArray(id) ? id[0] : id;
   const pcId = Array.isArray(colorId) ? colorId[0] : colorId;
+  const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('productColorSize.view');
 
   const [rows, setRows] = useState([]);
@@ -33,14 +35,19 @@ export default function Page() {
     load();
   }, [pcId]);
 
-  const onDelete = async (sizeId) => {
-    if (!confirm('حذف شود؟')) return;
-    try {
-      await deleteSize(sizeId);
-      setRows((prev) => prev.filter((x) => x.ID !== sizeId));
-    } catch {
-      alert('خطا در حذف سایز');
-    }
+  const onDelete = (id) => {
+    setDialog({
+      type: 'confirm',
+      message: 'آیا از حذف این سایز مطمئن هستید؟',
+      onConfirm: async () => {
+        try {
+          await deleteSize(id);
+          setRows(prev => prev.filter(c => c.ID !== id));
+        } catch {
+          setDialog({ type: 'error', message: 'خطا در حذف سایز' });
+        }
+      }
+    });
   };
 
   return (
@@ -97,6 +104,14 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      <DialogBox
+        type={dialog.type}
+        message={dialog.message}
+        onClose={() => setDialog({ type: '', message: '', onConfirm: null })}
+        onConfirm={dialog.onConfirm}
+      />
+
     </RequirePermission>
   );
 }
