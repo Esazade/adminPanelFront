@@ -161,14 +161,15 @@ export default function Page() {
                       </Link>
                     </>
                   )}
-                  {hasPermission('category.delete') && (
-                    <button
-                      onClick={() => onDelete(c.ID)}
-                      className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50"
-                    >
-                      حذف
-                    </button>
-                  )}
+                  {hasPermission('category.delete') && c.ParentCategoryID !== null && (
+                      <button
+                        onClick={() => onDelete(c.ID)}
+                        className="ml-2 px-2 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50"
+                      >
+                        حذف
+                      </button>
+                    )}
+
                 </td>
               </tr>
             ))}

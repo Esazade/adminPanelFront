@@ -29,7 +29,7 @@ export default function Login() {
       if (!token) throw new Error('توکن دریافت نشد');
 
       localStorage.setItem(TOKEN_KEY, token);
-      window.location.href = '/'; 
+      window.location.href = '/dashboard'; 
     } catch (err) {
       console.error('❌ Login Error:', err);
       alert(err.message || 'خطا در ورود به سیستم');
