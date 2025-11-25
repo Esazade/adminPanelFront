@@ -11,6 +11,10 @@ export default function Page() {
   const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
   const canView = hasPermission('siteSettings.view');
 
+  // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000'
+  const API = 'http://localhost:5000'
+  const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`)
+
   useEffect(() => {
     if (!canView) return;
     (async () => {
@@ -48,23 +52,28 @@ export default function Page() {
           <thead className="bg-slate-50 text-slate-600 text-center">
             <tr>
               <th className="px-3 py-2">#</th>
-              <th className="px-3 py-2">نام</th>
-              <th className="px-3 py-2">محل نمایش</th>
-              <th className="px-3 py-2">نوع</th>
-              <th className="px-3 py-2">فعال؟</th>
+              <th className="px-3 py-2">عنوان</th>
+              <th className="px-3 py-2">لینک</th>
+              <th className="px-3 py-2 text-center">تصویر</th>
               <th className="px-3 py-2">عملیات</th>
             </tr>
           </thead>
           <tbody className="text-center">
-            {sliders.map((s, i) => (
+            {sliders.map((s, i) => {
+              const ImageUrl = toAbs(s.ImageUrl || s.ImageUrl)
+              return (
               <tr key={s.ID} className="border-t">
                 <td className="px-3 py-2">{i + 1}</td>
-                <td className="px-3 py-2">{s.Name}</td>
-                <td className="px-3 py-2">{s.Placement}</td>
-                <td className="px-3 py-2">{s.Type}</td>
-                <td className="px-3 py-2">{s.IsActive ? '✅' : '❌'}</td>
+                <td className="px-3 py-2">{s.Title}</td>
+                <td className="px-3 py-2">{s.LinkUrl}</td>
                 <td className="px-3 py-2">
-                  <Link href={`/sliders/${s.ID}/items`} className="ml-2 px-2 py-1 border rounded hover:bg-slate-50">آیتم‌ها</Link>
+                  {ImageUrl ? (
+                    <img src={ImageUrl} alt={s.Title} className="h-8 mx-auto" />
+                  ) : (
+                    <span className="text-xs text-slate-400">بدون لوگو</span>
+                  )}
+                </td>
+                <td className="px-3 py-2">
                   {hasPermission('siteSettings.manage') && (
                     <Link href={`/sliders/${s.ID}`} className="ml-2 px-2 py-1 border rounded hover:bg-slate-50">ویرایش</Link>
                   )}
@@ -73,7 +82,8 @@ export default function Page() {
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

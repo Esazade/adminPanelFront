@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function BrandForm({ brandId }) {
   const isNew = brandId === 'new';
   const [dialog, setDialog] = useState({ type: '', message: '', onConfirm: null });
+  
   // const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
   const API = 'http://localhost:5000';
   const toAbs = (u) => (!u ? '' : u.startsWith('http') ? u : `${API}${u}`);
